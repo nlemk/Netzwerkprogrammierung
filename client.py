@@ -13,7 +13,7 @@ from time import gmtime, strftime
 
 dateTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-clientID = str(getnode())
+clientID = str(getnode()) + "--Number1"
 
 system = platform
 
@@ -101,10 +101,12 @@ beatID = json.dumps({"Client-ID": clientID})
 
 host = 'localhost'
 port = 9000
+connectionRefused = True
 
 #connect
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
 s.connect((host,port))
+
 
 accept = False
 while not accept:
@@ -114,8 +116,22 @@ while not accept:
 	print(recievedbytes.decode('utf-8'))
 	accept = True
 
-
 s.send(bytes(infotext,'utf-8'))	
+print("newPort")
+recievedbytes = s.recv(50)
+newPort = recievedbytes.decode('utf-8')
+newPort = json.loads(newPort)
+port = newPort["newPort"]
+s.close();
+del(s)
+#newSocket
+print("newPort")
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
+print(port)
+time.sleep(1)
+s.connect((host,port))
+
+
 while True:
 	time.sleep(0.5)
 	s.send(bytes(beatID,'utf-8'))
