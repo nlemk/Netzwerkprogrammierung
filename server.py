@@ -21,7 +21,7 @@ def heartbeat(newSocket):
 		print("thread" + str(count))
 		count+=1
 		try:
-			beat = newSocket.recv(40)
+			beat = newSocket.recv(100)
 			if (len(beat) > 0):
 				iD = beat.decode('utf-8')
 				json_iD = json.loads(iD)
