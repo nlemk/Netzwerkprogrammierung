@@ -10,19 +10,19 @@ import time
 from uuid import getnode
 from time import gmtime, strftime
 
-
 dateTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+print(dateTime)
 
 clientID = str(getnode()) + "--Number1"
 
-system = platform
+'''system = platform
 
 systemInfo = {"system" : system.system(),
 	      "machine" : system.machine(),
 	      "version" : system.version(),
 	      "platform" : system.platform(),
 	      "processor" : system.processor()
-		}
+		}'''
 
 cpu = subprocess.Popen(["lscpu | grep -E Arc\|name\|CPU"], stdout=subprocess.PIPE, shell=True) 
 cpu1 = str(cpu.communicate()[0]).replace('\\n','\n')
@@ -67,8 +67,8 @@ for x in range(0, len(ram1)):
 	ramInfo.update({dictName : dictInfo})
 
 
-
-gpu = subprocess.Popen(["lshw -c video | grep -E Besch\|Prod\|Herst\|Takt"], stdout=subprocess.PIPE,stderr=subprocess.STDOUT, shell=True)
+#deutsche und englische Beschreibung
+gpu = subprocess.Popen(["lshw -c video | grep -E Besch\|desc\|Prod\|prod\|Herst\|vendor\|Takt\|clock"], stdout=subprocess.PIPE,stderr=subprocess.STDOUT, shell=True)
 
 gpu1 = str(gpu.communicate()[0]).replace('\\n','\n')
 
@@ -122,13 +122,14 @@ recievedbytes = s.recv(50)
 newPort = recievedbytes.decode('utf-8')
 newPort = json.loads(newPort)
 port = newPort["newPort"]
-s.close();
+s.close()
 del(s)
+
 #newSocket
 print("newPort")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
 print(port)
-time.sleep(1)
+time.sleep(0.1)
 s.connect((host,port))
 
 

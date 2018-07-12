@@ -3,7 +3,7 @@
 import socket
 import json
 import time 
-from threading import Thread 
+from threading import Thread
 
 
 host = 'localhost'
@@ -11,11 +11,12 @@ port = 9000
 newPort = port+1
 count = 0
 clientList = []
+connectedClients = []
 
 def heartbeat(newSocket):
 	connected = True
 	global count
-	print("aaa")
+	json_iD = None
 	while connected:
 		print("thread" + str(count))
 		count+=1
@@ -27,12 +28,14 @@ def heartbeat(newSocket):
 				print(json_iD["Client-ID"])
 			else:
 				connected = False
-				if json_iD != None:
-					clientList.remove(json_iD["Client-ID"])
 				print("disconnected")
+				
 			time.sleep(0.5)
 		except ConnectionResetError:
 			print("Connection lost")
+		except json.decoder.JSONDecodeError:
+			connected = True
+	print("end")
 
 
 def anmelden(s):
@@ -59,18 +62,18 @@ def anmelden(s):
 		inSocket.send(bytes(newPortInfo,'utf-8'))
 		connectThread = Thread(target=newConnection, args=(newPort,))
 		newPort += 1
-		clientList.append(json_info["Client-ID"])
+		#check if in clientList
+		registered = False
+		for x in range (0, len(clientList)):
+			if json_info["Client-ID"] == clientList[x]["Client-ID"]:
+				registered = True
+		if not registered:
+			clientList.append(json_info)
 		connectThread.start()
 		inSocket.close()
 		
 		s.listen(socket.SOMAXCONN)
 		anmelden(s)
-		
-		'''t = Thread(target=heartbeat, args=(inSocket,))	
-		t.start()'''
-		'''while len(clientList) > 0:
-			print(clientList)
-			time.sleep(0.5)'''
 	finally:
 		s.close()
 
@@ -84,14 +87,13 @@ def newConnection(newport):
 
 		t = Thread(target=heartbeat, args=(newSocket,))	
 		t.start()
-		while len(clientList) > 0:
-			print(clientList)
+		while t.is_alive():	
+			print(len(clientList))		
 			time.sleep(0.5)
+
 	finally:
 		newSocket.close()
 		newsock.close()
-
-	
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
