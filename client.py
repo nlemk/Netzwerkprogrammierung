@@ -9,12 +9,75 @@ import os
 import time 
 from uuid import getnode
 from time import gmtime, strftime
+from package import Package
+import random
+from threading import Thread
+
+conn = True
+pack = None
+packageDict ={}
+def listener(s):
+	global pack
+	while conn:
+		
+		action = input()
+		print(input)
+		if action == "update":
+			print("update")
+			for x in range(0,len(packageList)):
+				packageDict.update({"Package"+str(x+1) : {"Packagename" : packageList[x].name,
+								"Version" : packageList[x].version,
+								"URL" : packageList[x].url}})	
+		
+			pack = {"Packages" : packageDict}
+			#pack =  json.dumps(pack)
+			print(len(pack))
+			#s.send(bytes(pack, 'utf-8'))
+			print("erfolgreich")
+		elif action == "upgrade":
+			x = 1
+			#upgrade
+
+
+
 
 dateTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 print(dateTime)
 
 clientID = str(getnode()) + "--Number1"
 
+package1 = Package("test1", "1.0.4", "http://localhost:9000/resources/myclient_1.0.tgz")
+package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
+package3 = Package("package1", "2.7.5", "http://localhost:9000/resources/importantStuff.tgz")
+package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/resources/fancy.tgz")
+
+#4Packages momentan
+anzahlPackages = random.randint(0,3)
+
+packageList=[]
+
+if(anzahlPackages == 0):
+	packageList.append(package3)
+elif(anzahlPackages == 1):
+	packageList.append(package3)
+	packageList.append(package4)
+elif(anzahlPackages == 2):
+	packageList.append(package3)
+	packageList.append(package1)
+	packageList.append(package2)
+else:
+	packageList.append(package1)
+	packageList.append(package2)
+	packageList.append(package3)
+	packageList.append(package4)
+
+
+#print(len(packageList))
+#packageDict = {3:{4:5,6:3}}
+#packageDict[3].update({2:9})
+#packageDict[3].update({4:6})
+#print(packageDict)
+	
 '''system = platform
 
 systemInfo = {"system" : system.system(),
@@ -131,10 +194,31 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
 print(port)
 time.sleep(0.1)
 s.connect((host,port))
-
-
+time.sleep(0.2)
+count = 0
+t = Thread(target = listener, args=(s,))
+t.start()
 while True:
 	time.sleep(0.5)
-	s.send(bytes(beatID,'utf-8'))
+	count += 1
+	if pack is not None:
+		pack.update({"Client-ID": clientID})
+		pack =  json.dumps(pack)
+		s.send(bytes(pack, 'utf-8'))
+		print(pack)
+		pack = None
+		time.sleep(0.5)
+		
+		'''if count == 2:
+			for x in range(0,len(packageList)):
+				packageDict.update({"Package"+str(x+1) : {"Packagename" : packageList[x].name,
+								"Version" : packageList[x].version,
+								"URL" : packageList[x].url}})	
+			packages =  json.dumps(packageDict)
+			s.send(bytes(packages, 'utf-8'))
+			time.sleep(0.5)'''
+		#if count < 5:
+	else:
+		s.send(bytes(beatID,'utf-8'))
 
 s.close()

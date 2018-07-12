@@ -4,6 +4,7 @@ import socket
 import json
 import time 
 from threading import Thread
+from package import Package
 
 
 host = 'localhost'
@@ -13,6 +14,12 @@ count = 0
 clientList = []
 connectedClients = []
 
+package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.tgz")
+package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
+package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.tgz")
+package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.tgz")
+
+
 def heartbeat(newSocket):
 	connected = True
 	global count
@@ -21,11 +28,18 @@ def heartbeat(newSocket):
 		print("thread" + str(count))
 		count+=1
 		try:
-			beat = newSocket.recv(100)
-			if (len(beat) > 0):
-				iD = beat.decode('utf-8')
-				json_iD = json.loads(iD)
-				print(json_iD["Client-ID"])
+			#heartbeat setzt aus funktion wartet auf eingabe -> beendet nicht
+			# timer oder timeout einbauen, eartet max 5sek auf eingabe, keine da -> disconnect
+			# listen auslagern in neuen Thread
+			# compare der packages -> liste abschicken
+			message = newSocket.recv(1000)
+			if (len(message) > 0):
+				message = message.decode('utf-8')
+				message = json.loads(message)
+				if "Client-ID" in message:
+					print(message["Client-ID"])
+				if "Packages" in message:
+					print(message["Packages"])
 			else:
 				connected = False
 				print("disconnected")
