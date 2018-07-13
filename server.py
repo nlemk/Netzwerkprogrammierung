@@ -14,12 +14,20 @@ count = 0
 clientList = []
 connectedClients = []
 
-package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.tgz")
-package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
-package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.tgz")
-package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.tgz")
+package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.zip")
+package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
+package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
+package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
 
 packageList = [package1, package2, package3, package4]
+
+
+def upgrade(package):
+	#json string erstellen
+	strings = {"Upgrade":"upgrade test"}
+	strings = json.dumps(strings)
+	return strings
+
 
 
 def checkForUpdate(clientPackages):
@@ -40,6 +48,7 @@ def checkForUpdate(clientPackages):
 
 def heartbeat(newSocket):
 	connected = True
+
 	global count
 	json_iD = None
 	while connected:
@@ -71,6 +80,11 @@ def heartbeat(newSocket):
 					upd = json.dumps(upd)
 					time.sleep(0.5)
 					newSocket.send(bytes(upd,'utf-8'))
+				if "Upgrade" in message:
+					print("upgrade")
+					upgradeMessage = upgrade(message["Upgrade"]["Package"])
+					time.sleep(0.2)
+					newSocket.send(bytes(upgradeMessage,'utf-8'))
 			else:
 				connected = False
 				print("disconnected")

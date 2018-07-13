@@ -16,6 +16,8 @@ from threading import Thread
 conn = True
 pack = None
 packageDict ={}
+updateList=[]
+upgrade = []
 def listener(s):
 	global pack
 	while conn:
@@ -35,8 +37,11 @@ def listener(s):
 			#s.send(bytes(pack, 'utf-8'))
 			print("erfolgreich")
 		elif action == "upgrade":
-			x = 1
-			#upgrade
+			print("upgrade")
+			if len(upgrade) == 0
+				for x in updateList:
+					upgrade.append({"Package" : x})	
+			updateList = []			
 
 
 
@@ -46,10 +51,10 @@ print(dateTime)
 
 clientID = str(getnode()) + "--Number1"
 
-package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.tgz")
-package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
-package3 = Package("package1", "2.7.5", "http://localhost:9000/resources/importantStuff.tgz")
-package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/resources/fancy.tgz")
+package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.zip")
+package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
+package3 = Package("package1", "2.7.5", "http://localhost:9000/resources/importantStuff.zip")
+package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/resources/fancy.zip")
 
 #4Packages momentan
 anzahlPackages = random.randint(0,3)
@@ -115,6 +120,7 @@ for x in range(0, len(cpu1)):
 		continue
 
 DEVNULL = open(os.devnull, 'wb')
+
 ram = subprocess.Popen(["cat /proc/meminfo | grep -E Mem"], stdout=subprocess.PIPE, shell=True)
 ram1 = str(ram.communicate()[0]).replace('\\n','\n')
 ram1 = ram1[2: len(ram1)-2]
@@ -212,11 +218,11 @@ while True:
 		pack = None
 		time.sleep(0.5)
 
-		updateList = []
 		updater = s.recv(200)
 		updater = updater.decode('utf-8')
 		updater = json.loads(updater)
 		print(updater)
+		updateList=[]
 		if type(updater["Updates"]) == str:
 			print(updater["Updates"])
 		else :
@@ -226,6 +232,25 @@ while True:
 		if len(updateList) > 0:
 			print(updateList)
 				
+	elif len(upgrade) > 0:
+		#todo upgrade
+		for x in range(0, len(upgrade)):
+			
+			upgradePackage = {"Upgrade" : upgrade[x]}
+			upgradePackage.update({"Client-ID": clientID})
+			upgradePackage =  json.dumps(upgradePackage)
+			print(upgradePackage)
+			s.send(bytes(upgradePackage,'utf-8'))
+			time.sleep(0.5)
+
+			upgradeText = s.recv(200)
+			upgradeText = upgradeText.decode('utf-8')
+			print(upgradeText)
+			upgradeText = json.loads(upgradeText)
+			print(upgradeText)
+			#neue datein upgraden und version ändern	
+		print(updateList)
+		upgrade = []
 	else:
 		s.send(bytes(beatID,'utf-8'))
 
