@@ -16,12 +16,12 @@ from threading import Thread
 conn = True
 pack = None
 packageDict ={}
-def listener(s):
+def listener():
 	global pack
 	while conn:
 		
 		action = input()
-		print(input)
+		print(action)
 		if action == "update":
 			print("update")
 			for x in range(0,len(packageList)):
@@ -37,8 +37,6 @@ def listener(s):
 		elif action == "upgrade":
 			x = 1
 			#upgrade
-
-
 
 
 dateTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -151,9 +149,10 @@ for x in range(0, len(gpu1)):
 		gpuInfo.update({dictName : dictInfo})
 
 info = {"Client-ID": clientID,
-	"CPU:Info" : cpuInfo,
-        "RAM-Info" : ramInfo,
-	"GPU-Info" : gpuInfo
+	"Info"     : {"CPU:Info" : cpuInfo,
+        	      "RAM-Info" : ramInfo,
+		      "GPU-Info" : gpuInfo
+	             }
 	}
 
 infotext = json.dumps(info)
@@ -192,14 +191,39 @@ del(s)
 print("newPort")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
 print(port)
-time.sleep(0.1)
+time.sleep(0.5)
 s.connect((host,port))
-time.sleep(0.2)
+time.sleep(0.5)
+
 recievedbytes = s.recv(50)
 message = recievedbytes.decode('utf-8')
 print(message)
+message = json.loads(message)
+print(message["info"])
+time.sleep(0.5)
+
+recievedbytes = s.recv(50)
+message = recievedbytes.decode('utf-8')
+print(message)
+time.sleep(0.5)
+
+if message == "Send Client Data":
+	print("send")
+	data = {"Hostname" : socket.gethostname(),
+		"Client-ID": clientID,
+		"IP"       : socket.gethostbyname(socket.gethostname()),	
+		"Alive"    : "True",
+		"Datum"    : dateTime,
+		"Info"     : {"CPU-Info" : cpuInfo,
+        		      "RAM-Info" : ramInfo,
+			      "GPU-Info" : gpuInfo
+			     }
+		}
+	data = json.dumps(data)
+	s.send(bytes(data,'utf-8'))
+	
 count = 0
-t = Thread(target = listener, args=(s,))
+t = Thread(target = listener)
 t.start()
 while True:
 	time.sleep(0.5)
