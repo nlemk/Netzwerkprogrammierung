@@ -46,7 +46,7 @@ print(dateTime)
 
 clientID = str(getnode()) + "--Number1"
 
-package1 = Package("test1", "1.0.4", "http://localhost:9000/resources/myclient_1.0.tgz")
+package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.tgz")
 package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
 package3 = Package("package1", "2.7.5", "http://localhost:9000/resources/importantStuff.tgz")
 package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/resources/fancy.tgz")
@@ -57,19 +57,19 @@ anzahlPackages = random.randint(0,3)
 packageList=[]
 
 if(anzahlPackages == 0):
-	packageList.append(package3)
+	packageList.append(package2)
 elif(anzahlPackages == 1):
-	packageList.append(package3)
 	packageList.append(package4)
+	packageList.append(package3)
 elif(anzahlPackages == 2):
 	packageList.append(package3)
 	packageList.append(package1)
 	packageList.append(package2)
 else:
-	packageList.append(package1)
-	packageList.append(package2)
 	packageList.append(package3)
 	packageList.append(package4)
+	packageList.append(package1)
+	packageList.append(package2)
 
 
 #print(len(packageList))
@@ -195,6 +195,9 @@ print(port)
 time.sleep(0.1)
 s.connect((host,port))
 time.sleep(0.2)
+recievedbytes = s.recv(50)
+message = recievedbytes.decode('utf-8')
+print(message)
 count = 0
 t = Thread(target = listener, args=(s,))
 t.start()
@@ -205,19 +208,24 @@ while True:
 		pack.update({"Client-ID": clientID})
 		pack =  json.dumps(pack)
 		s.send(bytes(pack, 'utf-8'))
-		print(pack)
+		#print(pack)
 		pack = None
 		time.sleep(0.5)
+
+		updateList = []
+		updater = s.recv(200)
+		updater = updater.decode('utf-8')
+		updater = json.loads(updater)
+		print(updater)
+		if type(updater["Updates"]) == str:
+			print(updater["Updates"])
+		else :
+			for x in range(0, len(updater["Updates"])):
+				updateList.append(updater["Updates"]["update" + str(x+1)])
 		
-		'''if count == 2:
-			for x in range(0,len(packageList)):
-				packageDict.update({"Package"+str(x+1) : {"Packagename" : packageList[x].name,
-								"Version" : packageList[x].version,
-								"URL" : packageList[x].url}})	
-			packages =  json.dumps(packageDict)
-			s.send(bytes(packages, 'utf-8'))
-			time.sleep(0.5)'''
-		#if count < 5:
+		if len(updateList) > 0:
+			print(updateList)
+				
 	else:
 		s.send(bytes(beatID,'utf-8'))
 

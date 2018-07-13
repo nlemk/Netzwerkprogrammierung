@@ -5,7 +5,7 @@ import json
 import time 
 from threading import Thread
 from package import Package
-
+from distutils.version import LooseVersion
 
 host = 'localhost'
 port = 9000
@@ -18,6 +18,24 @@ package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1
 package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
 package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.tgz")
 package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.tgz")
+
+packageList = [package1, package2, package3, package4]
+
+
+def checkForUpdate(clientPackages):
+	#falls keine Packages installiert sind
+	updateList = []
+	if not bool(clientPackages):
+		updateList.append("Everything up to date")
+		return updateMessage
+	else:
+		for x in range(0,len(clientPackages)):
+			for y in range(0, len(packageList)):
+				pack = clientPackages["Package" + str(x+1)]
+				if (pack["Packagename"] == packageList[y].name):
+					if LooseVersion(pack["Version"]) < LooseVersion(packageList[y].version):
+						updateList.append(packageList[y].name)
+		return updateList
 
 
 def heartbeat(newSocket):
@@ -39,7 +57,20 @@ def heartbeat(newSocket):
 				if "Client-ID" in message:
 					print(message["Client-ID"])
 				if "Packages" in message:
-					print(message["Packages"])
+					if not bool(message["Packages"]):
+						upd = {"Updates" : "Keine Updates vorhanden"}
+					else:
+						updater = checkForUpdate(message["Packages"])
+						if len(updater) > 0:
+							updates = {}
+							for x in range(0, len(updater)):
+								updates.update({"update" + str(x+1) : updater[x]})
+							upd = {"Updates" : updates}
+						else:
+							upd = {"Updates" : "Keine Updates vorhanden"}
+					upd = json.dumps(upd)
+					time.sleep(0.5)
+					newSocket.send(bytes(upd,'utf-8'))
 			else:
 				connected = False
 				print("disconnected")
