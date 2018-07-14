@@ -2,10 +2,13 @@
 
 import socket
 import json
+import re
 import time 
 from threading import Thread
 from package import Package
 from distutils.version import LooseVersion
+import subprocess
+import queue
 
 host = 'localhost'
 port = 9000
@@ -22,11 +25,44 @@ package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fanc
 packageList = [package1, package2, package3, package4]
 
 
-def upgrade(package):
+def upgrade(package, queues):
+	print(package)
+	upgradePackage = None
+	for x in packageList:
+		if x.name == package:
+			upgradePackage = x
+	zipName = upgradePackage.url.split("/")
+	zipName = zipName[len(zipName)-1]
+	packageInfo = subprocess.Popen(["unzip -l resources/" + zipName], stdout=subprocess.PIPE, shell=True)
+	packageInfo = str(packageInfo.communicate()[0]).replace('\\n','\n')
+	packageInfo = packageInfo[2: len(packageInfo)-2]
+	packageInfo = packageInfo.split('\n')
+
+	dateien = []
+	for x in range(0, len(packageInfo)):
+		pattern1 = re.compile(zipName[0:len(zipName)-4])
+		m = pattern1.search(packageInfo[x])
+		if m:
+			dateien.append(packageInfo[x][m.span()[1]+1:])
+	dateien = dateien[2:len(dateien)]#start 2 wegen 'zip' und ''
+	print(dateien)
+	dataList=[]
+	for x in dateien:
+		packageData = subprocess.Popen(["unzip -c resources/" + zipName + " " + zipName[0:len(zipName)-4] +"/" + x], stdout=subprocess.PIPE, shell=True)
+		packageData = str(packageData.communicate()[0]).replace('\\n','\n')
+		packageData = packageData[2: len(packageData)-2]
+		packageData = packageData.split('\n')
+		dataList.append((x,packageData[2:len(packageData)]))
+	#print(dataList)
+	#print(newPort)
+	upgradeDict = {"Upgrade": "start"}
+	for x in dataList:
+		upgradeDict.update({x[0]:x[1]})
+	#print(upgradeDict)
 	#json string erstellen
-	strings = {"Upgrade":"upgrade test"}
-	strings = json.dumps(strings)
-	return strings
+	strings = json.dumps(upgradeDict)
+	queues.put(strings)
+	#return strings
 
 
 
@@ -82,9 +118,16 @@ def heartbeat(newSocket):
 					newSocket.send(bytes(upd,'utf-8'))
 				if "Upgrade" in message:
 					print("upgrade")
-					upgradeMessage = upgrade(message["Upgrade"]["Package"])
+					queues = queue.Queue()
+					upgradeThread = Thread(target = upgrade, args=(message["Upgrade"]["Package"],queues,))
+					upgradeThread.start()
 					time.sleep(0.2)
-					newSocket.send(bytes(upgradeMessage,'utf-8'))
+					upgradeThread.join()
+					strings  = queues.get()
+					queues.task_done()
+					print(strings)
+					print("thread sollte laufen")
+					newSocket.send(bytes(strings,'utf-8'))
 			else:
 				connected = False
 				print("disconnected")
