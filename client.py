@@ -16,10 +16,11 @@ from threading import Thread
 conn = True
 pack = None
 packageDict ={}
-updateList=[]
+updateList = []
 upgrade = []
+
 def listener(s):
-	global pack
+	global pack,updateList
 	while conn:
 		
 		action = input()
@@ -38,7 +39,7 @@ def listener(s):
 			print("erfolgreich")
 		elif action == "upgrade":
 			print("upgrade")
-			if len(upgrade) == 0
+			if len(upgrade) == 0:
 				for x in updateList:
 					upgrade.append({"Package" : x})	
 			updateList = []			
@@ -235,7 +236,7 @@ while True:
 	elif len(upgrade) > 0:
 		#todo upgrade
 		for x in range(0, len(upgrade)):
-			
+			print(x)
 			upgradePackage = {"Upgrade" : upgrade[x]}
 			upgradePackage.update({"Client-ID": clientID})
 			upgradePackage =  json.dumps(upgradePackage)
@@ -243,13 +244,11 @@ while True:
 			s.send(bytes(upgradePackage,'utf-8'))
 			time.sleep(0.5)
 
-			upgradeText = s.recv(200)
+			upgradeText = s.recv(1000)
 			upgradeText = upgradeText.decode('utf-8')
-			print(upgradeText)
 			upgradeText = json.loads(upgradeText)
 			print(upgradeText)
 			#neue datein upgraden und version ändern	
-		print(updateList)
 		upgrade = []
 	else:
 		s.send(bytes(beatID,'utf-8'))
