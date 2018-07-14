@@ -13,12 +13,13 @@ from package import Package
 import random
 from threading import Thread
 
-conn = True
+conn = False
 pack = None
+heartbeat = False
 packageDict ={}
 def listener():
-	global pack
-	while conn:
+	global pack, conn
+	while True:
 		
 		action = input()
 		print(action)
@@ -37,6 +38,8 @@ def listener():
 		elif action == "upgrade":
 			x = 1
 			#upgrade
+		elif action == "end" and heartbeat:
+			conn = False
 
 
 dateTime = strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -194,20 +197,21 @@ print(port)
 time.sleep(0.5)
 s.connect((host,port))
 time.sleep(0.5)
+conn = True
 
 recievedbytes = s.recv(50)
 message = recievedbytes.decode('utf-8')
-print(message)
 message = json.loads(message)
 print(message["info"])
 time.sleep(0.5)
 
 recievedbytes = s.recv(50)
 message = recievedbytes.decode('utf-8')
+message = json.loads(message)
 print(message)
 time.sleep(0.5)
 
-if message == "Send Client Data":
+if message["info2"] == "Send Client Data":
 	print("send")
 	data = {"Hostname" : socket.gethostname(),
 		"Client-ID": clientID,
@@ -225,7 +229,8 @@ if message == "Send Client Data":
 count = 0
 t = Thread(target = listener)
 t.start()
-while True:
+while conn:
+	heartbeat = True
 	time.sleep(0.5)
 	count += 1
 	if pack is not None:
@@ -252,5 +257,7 @@ while True:
 				
 	else:
 		s.send(bytes(beatID,'utf-8'))
-
-s.close()
+if not conn:
+	heartbeat = False
+	t.join()
+	s.close()

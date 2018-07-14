@@ -38,10 +38,15 @@ def checkForUpdate(clientPackages):
 						updateList.append(packageList[y].name)
 		return updateList
 
+def setAlive(clientID):
+	global clientList
+	for x in clientList:
+		if x["Client-ID"] == clientID:
+			x["Alive"] = "False"
 
 def heartbeat(newSocket, clientID):
 	connected = True
-	global count
+	global count,connectedClients
 	json_iD = None
 	while connected:
 		#print("thread" + str(count))
@@ -51,36 +56,46 @@ def heartbeat(newSocket, clientID):
 			# timer oder timeout einbauen, eartet max 5sek auf eingabe, keine da -> disconnect
 			# listen auslagern in neuen Thread
 			# compare der packages -> liste abschicken
-			
-			message = newSocket.recv(1000)
-			if (len(message) > 0):
-				message = message.decode('utf-8')
-				message = json.loads(message)
-				if "Client-ID" in message:
-					connected = True
-					#print(message["Client-ID"])
-				if "Packages" in message:
-					if not bool(message["Packages"]):
-						upd = {"Updates" : "Keine Updates vorhanden"}
-					else:
-						updater = checkForUpdate(message["Packages"])
-						if len(updater) > 0:
-							updates = {}
-							for x in range(0, len(updater)):
-								updates.update({"update" + str(x+1) : updater[x]})
-							upd = {"Updates" : updates}
-						else:
+			newSocket.settimeout(3)
+			try:
+				message = newSocket.recv(1000)
+				if (len(message) > 0):
+					message = message.decode('utf-8')
+					message = json.loads(message)
+					if "Client-ID" in message:
+						connected = True
+						#print(message["Client-ID"])
+					if "Packages" in message:
+						if not bool(message["Packages"]):
 							upd = {"Updates" : "Keine Updates vorhanden"}
-					upd = json.dumps(upd)
-					time.sleep(0.5)
-					newSocket.send(bytes(upd,'utf-8'))
-			else:
+						else:
+							updater = checkForUpdate(message["Packages"])
+							if len(updater) > 0:
+								updates = {}
+								for x in range(0, len(updater)):
+									updates.update({"update" + str(x+1) : updater[x]})
+								upd = {"Updates" : updates}
+							else:
+								upd = {"Updates" : "Keine Updates vorhanden"}
+						upd = json.dumps(upd)
+						time.sleep(0.5)
+						newSocket.send(bytes(upd,'utf-8'))
+				else:
+					connected = False
+					connectedClients.remove(clientID)
+					setAlive(clientID)
+					print("disconnected")
+				
+				time.sleep(0.5)
+			except socket.timeout:
+				print("disconnected --timeout")
 				connected = False
 				connectedClients.remove(clientID)
-				print("disconnected")
-				
-			time.sleep(0.5)
+				setAlive(clientID)
 		except ConnectionResetError:
+			connected = False
+			connectedClients.remove(clientID)
+			setAlive(clientID)
 			print("Connection lost")
 		except json.decoder.JSONDecodeError:
 			connected = True
@@ -138,11 +153,14 @@ def newConnection(newport, clientID):
 	newsock.listen(socket.SOMAXCONN)
 	try:
 		newSocket, addr = newsock.accept();
+		time.sleep(0.5)
 		text = {"info" : "Server changed Socket"}
 		text = json.dumps(text)
 		newSocket.send(bytes(text,'utf-8'))
-		time.sleep(0.5)
-		newSocket.send(bytes("Send Client Data",'utf-8'))
+		time.sleep(1)
+		text = {"info2" : "Send Client Data"}
+		text = json.dumps(text)
+		newSocket.send(bytes(text,'utf-8'))
 		time.sleep(0.5)
 		completeClientInfo = newSocket.recv(500)
 		completeClientInfo = completeClientInfo.decode('utf-8')
@@ -169,53 +187,75 @@ def listen():
 		action = action.split(" ")
 		if action[0] == "show":
 			found = False
-			for x in clientList:
-				if action[1] == x["Client-ID"]:
-					print("Hostname  : " + x["Hostname"])
-					print("Client-ID : " + x["Client-ID"])
-					print("IP        : " + x["IP"])
-					print("Alive     : " + x["Alive"])
-					print("Datum     : " + x["Datum"])
-					print("Info      : ")
-					#Info
-					info = x["Info"]
-					#CPU
-					print("\t    CPU-Info:")
-					cpu = info["CPU-Info"]
-					print("\t\t      Model name  : " + cpu["Model name"])
-					print("\t\t      CPU(s)      : " + cpu["CPU(s)"])
-					print("\t\t      Architecture: " + cpu["Architecture"])
-					#RAM
-					print("\t    RAM-Info:")
-					ram = info["RAM-Info"]
-					print("\t\t      MemTotal    : " + ram["MemTotal"])
-					print("\t\t      MemFree     : " + ram["MemFree"])
-					print("\t\t      MemAvailable: " + ram["MemAvailable"])
-					#GPU
-					print("\t    GPU-Info:")
-					gpu = info["GPU-Info"]
-					# check for german or english
-					if " Beschreibung" in gpu :
-						print("\t\t      Beschreibung :" + gpu[" Beschreibung"])
-						print("\t\t      Hersteller   :" + gpu[" Hersteller"])
-						print("\t\t      Produkt      :" + gpu[" Produkt"])
-						print("\t\t      Takt         :" + gpu[" Takt"])
-					else : 
-						print("\t\t      description :" + gpu[" description"])
-						print("\t\t      vendor      :" + gpu[" vendor"])
-						print("\t\t      product     :" + gpu[" product"])
-						print("\t\t      clock       :" + gpu[" clock"])
-					found = True
-					break
-			if not found:
-				print("Client nicht gefunden")
-		if action[0] == "list":	
+			if len(action) > 1 :
+				for x in clientList:
+					if action[1] == x["Client-ID"]:
+						print("Hostname  : " + x["Hostname"])
+						print("Client-ID : " + x["Client-ID"])
+						print("IP        : " + x["IP"])
+						print("Alive     : " + x["Alive"])
+						print("Datum     : " + x["Datum"])
+						print("Info      : ")
+						#Info
+						info = x["Info"]
+						#CPU
+						print("\t    CPU-Info:")
+						cpu = info["CPU-Info"]
+						print("\t\t      Model name   : " + cpu["Model name"])
+						print("\t\t      CPU(s)       : " + cpu["CPU(s)"])
+						print("\t\t      Architecture : " + cpu["Architecture"])
+						#RAM
+						print("\t    RAM-Info:")
+						ram = info["RAM-Info"]
+						print("\t\t      MemTotal     : " + ram["MemTotal"])
+						print("\t\t      MemFree      : " + ram["MemFree"])
+						print("\t\t      MemAvailable : " + ram["MemAvailable"])
+						#GPU
+						print("\t    GPU-Info:")
+						gpu = info["GPU-Info"]
+						# check for german or english
+						if " Beschreibung" in gpu :
+							print("\t\t      Beschreibung :" + gpu[" Beschreibung"])
+							print("\t\t      Hersteller   :" + gpu[" Hersteller"])
+							print("\t\t      Produkt      :" + gpu[" Produkt"])
+							print("\t\t      Takt         :" + gpu[" Takt"])
+						else : 
+							print("\t\t      description :" + gpu[" description"])
+							print("\t\t      vendor      :" + gpu[" vendor"])
+							print("\t\t      product     :" + gpu[" product"])
+							print("\t\t      clock       :" + gpu[" clock"])
+						found = True
+						break
+				if not found:
+					print("Client nicht gefunden")
+			else:
+				print("Gib eine ID hinter den Befehl show ein.")
+		elif action[0] == "list":	
 			if len(clientList) == 0:
 				print("Es hat sich noch kein Client mit dem Server verbunden")
 			else:
-				print("Hostname \t\t Client-ID")
+				print("Hostname \t\t Client-ID \t\t Status")
 				for x in clientList:
-					print(x["Hostname"] + " \t\t " + x["Client-ID"])
+					if x["Alive"] == "True":
+						active = "connected"
+					else: 
+						active = "not connected"
+					print(x["Hostname"] + " \t\t " + x["Client-ID"] + " \t\t " + active)
+		elif action[0] == "alive":
+			if len(action) > 1:
+				found = False
+				for x in clientList:
+					if x["Client-ID"] == action[1]:
+						if x["Alive"] == "True":
+							alive = "connected"
+						else:
+							alive = "not connected"
+						found = True
+						print("Client " + str(action[1]) + " is " + alive)
+				if not found:
+					print("Client nicht gefunden")
+			else:
+				print("Gib eine ID hinter den Befehl alive ein.")
 	
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
