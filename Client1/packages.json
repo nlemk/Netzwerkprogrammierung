@@ -1,0 +1,1 @@
+{"packages":[{"name":"test1","version":"1.0.3","url":"http://localhost:9000/resources/myclient_1.0.zip"},{"name":"useless Package","version":"1.0.0","url":"http://localhost:9000/resources/nothing.zip"},{"name":"package1","version":"2.08.7","url":"http://localhost:9000/resources/importantStuff.zip"}]}

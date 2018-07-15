@@ -25,6 +25,15 @@ def changeVersion(newVersion, packageName):
 		if x.name == packageName:
 			x.version = newVersion["Version"]
 	print("version changed")
+	f = open("packages.json", "w")
+	f.write("{\"packages\":[")
+	for x in range(0,len(packageList)):
+		if x == len(packageList)-1:
+			f.write("{\"name\":\""+packageList[x].name+"\",\"version\":\"" + packageList[x].version + "\",\"url\":\""+packageList[x].url+"\"}")
+		else:
+			f.write("{\"name\":\""+packageList[x].name+"\",\"version\":\"" + packageList[x].version + "\",\"url\":\""+packageList[x].url+"\"},")
+	f.write("]}")
+	f.close()
 
 def listener(s):
 	global pack,updateList
@@ -70,7 +79,21 @@ print(dateTime)
 
 clientID = str(getnode()) + "--Number1"
 
-package1 = Package("test1", "1.0.8", "http://localhost:9000/ressources/myclient_1.0.zip")
+packageList=[]
+try:
+	f = open("packages.json","r")
+	packageFile = f.read()
+	f.close()
+except FileNotFound:
+	pass
+if len(packageFile) > 0:
+	packages = json.loads(packageFile)
+	for x in packages["packages"]:
+		print(x)
+		newPackage = Package(x["name"],x["version"],x["url"])
+		packageList.append(newPackage)
+
+'''package1 = Package("test1", "1.0.8", "http://localhost:9000/ressources/myclient_1.0.zip")
 package2 = Package("useless Package", "1.0.0", "http://localhost:9000/ressources/nothing.zip")
 package3 = Package("package1", "2.7.5", "http://localhost:9000/ressources/importantStuff.zip")
 package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/ressources/fancy.zip")
@@ -93,7 +116,7 @@ else:
 	packageList.append(package3)
 	packageList.append(package4)
 	packageList.append(package1)
-	packageList.append(package2)
+	packageList.append(package2)'''
 
 
 #print(len(packageList))

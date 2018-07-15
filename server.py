@@ -17,12 +17,26 @@ count = 0
 clientList = []
 connectedClients = []
 
-package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
+'''package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
 package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
 package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
 package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
 
-packageList = [package1, package2, package3, package4]
+packageList = [package1, package2, package3, package4]'''
+
+packageList=[]
+try:
+	f = open("packages.json","r")
+	packageFile = f.read()
+	f.close()
+except FileNotFound:
+	pass
+if len(packageFile) > 0:
+	packages = json.loads(packageFile)
+	for x in packages["packages"]:
+		print(x)
+		newPackage = Package(x["name"],x["version"],x["url"])
+		packageList.append(newPackage)
 
 
 def upgrade(package, queues):
@@ -31,10 +45,9 @@ def upgrade(package, queues):
 	for x in packageList:
 		if x.name == package:
 			upgradePackage = x
-	zipName = upgradePackage.url.split("/")
-	zipName = zipName[len(zipName)-1]
-	print("resources/" +zipName)
-	f = open("resources/" +zipName, "rb")
+	zipName = upgradePackage.url.replace("http://localhost:9000/","")
+	#zipName = zipName[len(zipName)-1]
+	f = open(zipName, "rb")
 	zipData = f.read()
 	print(zipData)
 	f.close()
