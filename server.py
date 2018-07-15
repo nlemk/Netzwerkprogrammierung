@@ -121,6 +121,14 @@ def heartbeat(newSocket):
 						filename = ""
 					strings = json.dumps(newStrings)
 					newSocket.send(bytes(strings,'utf-8'))
+				if "message" in message:
+					for x in packageList:
+						if x.name == message["Name"]:
+							newVersion = {"Version" : x.version}
+							print(x.version)
+							time.sleep(0.5)
+							newSocket.send(bytes(json.dumps(newVersion),'utf-8'))
+							break	
 				if "Upgrade" in message:
 					print("upgrade")
 					queues = queue.Queue()
