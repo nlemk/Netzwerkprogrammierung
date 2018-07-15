@@ -195,7 +195,7 @@ def heartbeat(newSocket, clientID):
 								"Upgrade":"start",
 	        						"data" : string["data"][0:700],
 								"end": False}
-						data = string["data"][500:len(string["data"])]
+						data = string["data"][700:len(string["data"])]
 						filename = string["Filename"]
 						strings = json.dumps(newStrings)
 						newSocket.send(bytes(strings,'utf-8'))
