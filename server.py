@@ -2,11 +2,14 @@
 
 import socket
 import json
+import re
 import time 
 from threading import Thread
 from package import Package
 from distutils.version import LooseVersion
 import select
+import subprocess
+import queue
 
 host = 'localhost'
 port = 9000
@@ -15,12 +18,39 @@ count = 0
 clientList = []
 connectedClients = []
 
-package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.tgz")
-package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
-package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.tgz")
-package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.tgz")
+package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
+package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
+package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
+package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
 
 packageList = [package1, package2, package3, package4]
+
+
+def upgrade(package, queues):
+	print(package)
+	upgradePackage = None
+	for x in packageList:
+		if x.name == package:
+			upgradePackage = x
+	zipName = upgradePackage.url.split("/")
+	zipName = zipName[len(zipName)-1]
+	print("resources/" +zipName)
+	f = open("resources/" +zipName, "rb")
+	zipData = f.read()
+	print(zipData)
+	f.close()
+	try:
+		zipData = zipData.decode('latin-1')
+	except UnicodeDecodeError:
+		zipData = zipData.decode('utf-8')
+	#zipData.replace('\r\n', '\\r\\n')
+	data = {"Filename" : zipName,
+		"Upgrade":"start",
+	        "data" : zipData,
+		"end": True}
+	queues.put(data)
+
+
 
 
 def checkForUpdate(clientPackages):
@@ -48,6 +78,8 @@ def heartbeat(newSocket, clientID):
 	connected = True
 	global count,connectedClients
 	json_iD = None
+	data = ""
+	filename = ""
 	while connected:
 		#print("thread" + str(count))
 		count+=1
@@ -80,13 +112,95 @@ def heartbeat(newSocket, clientID):
 						upd = json.dumps(upd)
 						time.sleep(0.5)
 						newSocket.send(bytes(upd,'utf-8'))
+					
+					if len(data) > 0:
+						if len(data) > 700:
+							newStrings = {"Filename" : filename,
+								       "Upgrade": "start",
+								       "data"   : data[0:700],
+								       "end"    : False}
+							data = data[700:len(data)]
+							filename = filename
+						else:
+							newStrings = {"Filename" : filename,
+								       "Upgrade": "start",
+								       "data"   : data,
+								       "end"    : True}
+							data =""
+							filename = ""
+						strings = json.dumps(newStrings)
+						newSocket.send(bytes(strings,'utf-8'))
+					if "Upgrade" in message:
+						print("upgrade")
+						queues = queue.Queue()
+						upgradeThread = Thread(target = upgrade, args=(message["Upgrade"]["Package"],queues,))
+						upgradeThread.start()
+						time.sleep(0.2)
+						upgradeThread.join()
+						string = queues.get()
+						strings = json.dumps(string)
+						queues.task_done()
+						print(strings)
+						print("thread sollte laufen")
+						time.sleep(0.2)
+						if len(bytes(strings,'utf-8')) > 5000:
+							newStrings = {"Filename" : string["Filename"],
+									"Upgrade":"start",
+									"data" : string["data"][0:700],
+									"end": False}
+							data = string["data"][500:len(string["data"])]
+							filename = string["Filename"]
+							strings = json.dumps(newStrings)
+							newSocket.send(bytes(strings,'utf-8'))
+						else:
+							newSocket.send(bytes(strings,'utf-8'))
+
 				else:
 					connected = False
 					connectedClients.remove(clientID)
 					setAlive(clientID)
 					print("disconnected")
-				
-				time.sleep(0.5)
+				'''if len(data) > 0:
+					if len(data) > 700:
+						newStrings = {"Filename" : filename,
+							       "Upgrade": "start",
+							       "data"   : data[0:700],
+							       "end"    : False}
+						data = data[700:len(data)]
+						filename = filename
+					else:
+						newStrings = {"Filename" : filename,
+							       "Upgrade": "start",
+							       "data"   : data,
+							       "end"    : True}
+						data =""
+						filename = ""
+					strings = json.dumps(newStrings)
+					newSocket.send(bytes(strings,'utf-8'))
+				if "Upgrade" in message:
+					print("upgrade")
+					queues = queue.Queue()
+					upgradeThread = Thread(target = upgrade, args=(message["Upgrade"]["Package"],queues,))
+					upgradeThread.start()
+					time.sleep(0.2)
+					upgradeThread.join()
+					string = queues.get()
+					strings = json.dumps(string)
+					queues.task_done()
+					print(strings)
+					print("thread sollte laufen")
+					time.sleep(0.2)
+					if len(bytes(strings,'utf-8')) > 5000:
+						newStrings = {"Filename" : string["Filename"],
+								"Upgrade":"start",
+	        						"data" : string["data"][0:700],
+								"end": False}
+						data = string["data"][500:len(string["data"])]
+						filename = string["Filename"]
+						strings = json.dumps(newStrings)
+						newSocket.send(bytes(strings,'utf-8'))
+					else:
+						newSocket.send(bytes(strings,'utf-8'))'''
 			except socket.timeout:
 				print("disconnected --timeout")
 				connected = False

@@ -17,10 +17,12 @@ conn = False
 pack = None
 heartbeat = False
 packageDict ={}
+updateList = []
+upgrade = []
+
 def listener():
-	global pack, conn
-	while True:
-		
+	global pack, conn, updateList
+	while conn:
 		action = input()
 		print(action)
 		if action == "update":
@@ -36,8 +38,11 @@ def listener():
 			#s.send(bytes(pack, 'utf-8'))
 			print("erfolgreich")
 		elif action == "upgrade":
-			x = 1
-			#upgrade
+			print("upgrade")
+			if len(upgrade) == 0:
+				for x in updateList:
+					upgrade.append({"Package" : x})	
+			updateList = []	
 		elif action == "end" and heartbeat:
 			conn = False
 
@@ -47,10 +52,10 @@ print(dateTime)
 
 clientID = str(getnode()) + "--Number1"
 
-package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.tgz")
-package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.tgz")
-package3 = Package("package1", "2.7.5", "http://localhost:9000/resources/importantStuff.tgz")
-package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/resources/fancy.tgz")
+package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.zip")
+package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
+package3 = Package("package1", "2.7.5", "http://localhost:9000/resources/importantStuff.zip")
+package4 = Package("lastPackage", "3.5.1", "http://localhost:9000/resources/fancy.zip")
 
 #4Packages momentan
 anzahlPackages = random.randint(0,3)
@@ -116,6 +121,7 @@ for x in range(0, len(cpu1)):
 		continue
 
 DEVNULL = open(os.devnull, 'wb')
+
 ram = subprocess.Popen(["cat /proc/meminfo | grep -E Mem"], stdout=subprocess.PIPE, shell=True)
 ram1 = str(ram.communicate()[0]).replace('\\n','\n')
 ram1 = ram1[2: len(ram1)-2]
@@ -229,6 +235,7 @@ if message["info2"] == "Send Client Data":
 count = 0
 t = Thread(target = listener)
 t.start()
+gettingUpgrade = False
 while conn:
 	heartbeat = True
 	time.sleep(0.5)
@@ -241,11 +248,11 @@ while conn:
 		pack = None
 		time.sleep(0.5)
 
-		updateList = []
 		updater = s.recv(200)
 		updater = updater.decode('utf-8')
 		updater = json.loads(updater)
 		print(updater)
+		updateList=[]
 		if type(updater["Updates"]) == str:
 			print(updater["Updates"])
 		else :
@@ -255,6 +262,43 @@ while conn:
 		if len(updateList) > 0:
 			print(updateList)
 				
+	elif len(upgrade) > 0:
+		#todo upgrade
+		data = ""
+		for x in range(0, len(upgrade)):
+			print(x)
+			upgradePackage = {"Upgrade" : upgrade[x]}
+			'''upgradePackage.update({"Client-ID": clientID})
+			upgradePackage =  json.dumps(upgradePackage)
+			print(upgradePackage)
+			s.send(bytes(upgradePackage,'utf-8'))
+			time.sleep(0.5)'''
+
+			gettingUpgrade = True
+			while gettingUpgrade:	
+				print("get upgrade")	
+				upgradePackage.update({"Client-ID": clientID})
+				upgradePackage = json.dumps(upgradePackage)
+				print(upgradePackage)
+				s.send(bytes(upgradePackage,'utf-8'))
+				time.sleep(0.5)
+				
+				upgradeText = s.recv(5000)
+				upgradeText = upgradeText.decode('utf-8')
+				#upgradeText = json.loads(upgradeText)
+				upgradeText = json.loads(upgradeText, strict=False)
+				print(upgradeText["data"])
+				if upgradeText["Upgrade"] == "start":
+					data += upgradeText["data"]
+					print(upgradeText["end"])
+					if upgradeText["end"]:
+						f = open(upgradeText["Filename"], "wb")
+						f.write(bytes(data,'latin-1'))
+						f.close()
+						gettingUpgrade = False
+					upgradePackage = {}
+			#neue datein upgraden und version ändern	
+		upgrade = []
 	else:
 		s.send(bytes(beatID,'utf-8'))
 if not conn:
