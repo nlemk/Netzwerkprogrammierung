@@ -20,8 +20,14 @@ packageDict ={}
 updateList = []
 upgrade = []
 
+def changeVersion(newVersion, packageName):
+	global packeList
+	for x in packageList:
+		if x.name == packageName:
+			x.version = newVersion["Version"]
+
 def listener():
-	global pack, conn, updateList
+	global pack, updateList, conn
 	while conn:
 		action = input()
 		print(action)
@@ -37,6 +43,7 @@ def listener():
 			print(len(pack))
 			#s.send(bytes(pack, 'utf-8'))
 			print("erfolgreich")
+			print(pack)
 		elif action == "upgrade":
 			print("upgrade")
 			if len(upgrade) == 0:
@@ -297,6 +304,16 @@ while conn:
 						f.close()
 						gettingUpgrade = False
 					upgradePackage = {}
+				if not gettingUpgrade:
+					message = {"message":"upgraded","Name" : upgrade[x]["Package"]}
+					message.update({"Client-ID": clientID})
+					s.send(bytes(json.dumps(message),'utf-8'))
+					time.sleep(0.5)
+					version = s.recv(100)
+					version = version.decode('utf-8')
+					version = json.loads(version)
+					versionThread = Thread(target=changeVersion, args=(version,upgrade[x]["Package"],))
+					versionThread.start()
 			#neue datein upgraden und version ändern	
 		upgrade = []
 	else:

@@ -27,23 +27,22 @@ packageList = [package1, package2, package3, package4]
 
 
 def upgrade(package, queues):
-	print(package)
+	#print(package)
 	upgradePackage = None
 	for x in packageList:
 		if x.name == package:
 			upgradePackage = x
 	zipName = upgradePackage.url.split("/")
 	zipName = zipName[len(zipName)-1]
-	print("resources/" +zipName)
+	#print("resources/" +zipName)
 	f = open("resources/" +zipName, "rb")
 	zipData = f.read()
-	print(zipData)
+	#print(zipData)
 	f.close()
 	try:
 		zipData = zipData.decode('latin-1')
 	except UnicodeDecodeError:
 		zipData = zipData.decode('utf-8')
-	#zipData.replace('\r\n', '\\r\\n')
 	data = {"Filename" : zipName,
 		"Upgrade":"start",
 	        "data" : zipData,
@@ -160,47 +159,6 @@ def heartbeat(newSocket, clientID):
 					connectedClients.remove(clientID)
 					setAlive(clientID)
 					print("disconnected")
-				'''if len(data) > 0:
-					if len(data) > 700:
-						newStrings = {"Filename" : filename,
-							       "Upgrade": "start",
-							       "data"   : data[0:700],
-							       "end"    : False}
-						data = data[700:len(data)]
-						filename = filename
-					else:
-						newStrings = {"Filename" : filename,
-							       "Upgrade": "start",
-							       "data"   : data,
-							       "end"    : True}
-						data =""
-						filename = ""
-					strings = json.dumps(newStrings)
-					newSocket.send(bytes(strings,'utf-8'))
-				if "Upgrade" in message:
-					print("upgrade")
-					queues = queue.Queue()
-					upgradeThread = Thread(target = upgrade, args=(message["Upgrade"]["Package"],queues,))
-					upgradeThread.start()
-					time.sleep(0.2)
-					upgradeThread.join()
-					string = queues.get()
-					strings = json.dumps(string)
-					queues.task_done()
-					print(strings)
-					print("thread sollte laufen")
-					time.sleep(0.2)
-					if len(bytes(strings,'utf-8')) > 5000:
-						newStrings = {"Filename" : string["Filename"],
-								"Upgrade":"start",
-	        						"data" : string["data"][0:700],
-								"end": False}
-						data = string["data"][700:len(string["data"])]
-						filename = string["Filename"]
-						strings = json.dumps(newStrings)
-						newSocket.send(bytes(strings,'utf-8'))
-					else:
-						newSocket.send(bytes(strings,'utf-8'))'''
 			except socket.timeout:
 				print("disconnected --timeout")
 				connected = False
