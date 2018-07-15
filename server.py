@@ -17,7 +17,7 @@ count = 0
 clientList = []
 connectedClients = []
 
-package1 = Package("test1", "1.0.8", "http://localhost:9000/resources/myclient_1.0.zip")
+package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
 package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
 package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
 package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
@@ -33,36 +33,22 @@ def upgrade(package, queues):
 			upgradePackage = x
 	zipName = upgradePackage.url.split("/")
 	zipName = zipName[len(zipName)-1]
-	packageInfo = subprocess.Popen(["unzip -l resources/" + zipName], stdout=subprocess.PIPE, shell=True)
-	packageInfo = str(packageInfo.communicate()[0]).replace('\\n','\n')
-	packageInfo = packageInfo[2: len(packageInfo)-2]
-	packageInfo = packageInfo.split('\n')
+	print("resources/" +zipName)
+	f = open("resources/" +zipName, "rb")
+	zipData = f.read()
+	print(zipData)
+	f.close()
+	try:
+		zipData = zipData.decode('latin-1')
+	except UnicodeDecodeError:
+		zipData = zipData.decode('utf-8')
+	#zipData.replace('\r\n', '\\r\\n')
+	data = {"Filename" : zipName,
+		"Upgrade":"start",
+	        "data" : zipData,
+		"end": True}
+	queues.put(data)
 
-	dateien = []
-	for x in range(0, len(packageInfo)):
-		pattern1 = re.compile(zipName[0:len(zipName)-4])
-		m = pattern1.search(packageInfo[x])
-		if m:
-			dateien.append(packageInfo[x][m.span()[1]+1:])
-	dateien = dateien[2:len(dateien)]#start 2 wegen 'zip' und ''
-	print(dateien)
-	dataList=[]
-	for x in dateien:
-		packageData = subprocess.Popen(["unzip -c resources/" + zipName + " " + zipName[0:len(zipName)-4] +"/" + x], stdout=subprocess.PIPE, shell=True)
-		packageData = str(packageData.communicate()[0]).replace('\\n','\n')
-		packageData = packageData[2: len(packageData)-2]
-		packageData = packageData.split('\n')
-		dataList.append((x,packageData[2:len(packageData)]))
-	#print(dataList)
-	#print(newPort)
-	upgradeDict = {"Upgrade": "start"}
-	for x in dataList:
-		upgradeDict.update({x[0]:x[1]})
-	#print(upgradeDict)
-	#json string erstellen
-	strings = json.dumps(upgradeDict)
-	queues.put(strings)
-	#return strings
 
 
 
@@ -87,9 +73,11 @@ def heartbeat(newSocket):
 
 	global count
 	json_iD = None
+	data = ""
+	filename = ""
 	while connected:
 		print("thread" + str(count))
-		count+=1
+		count+=1		
 		try:
 			#heartbeat setzt aus funktion wartet auf eingabe -> beendet nicht
 			# timer oder timeout einbauen, eartet max 5sek auf eingabe, keine da -> disconnect
@@ -116,6 +104,23 @@ def heartbeat(newSocket):
 					upd = json.dumps(upd)
 					time.sleep(0.5)
 					newSocket.send(bytes(upd,'utf-8'))
+				if len(data) > 0:
+					if len(data) > 700:
+						newStrings = {"Filename" : filename,
+							       "Upgrade": "start",
+							       "data"   : data[0:700],
+							       "end"    : False}
+						data = data[700:len(data)]
+						filename = filename
+					else:
+						newStrings = {"Filename" : filename,
+							       "Upgrade": "start",
+							       "data"   : data,
+							       "end"    : True}
+						data =""
+						filename = ""
+					strings = json.dumps(newStrings)
+					newSocket.send(bytes(strings,'utf-8'))
 				if "Upgrade" in message:
 					print("upgrade")
 					queues = queue.Queue()
@@ -123,11 +128,24 @@ def heartbeat(newSocket):
 					upgradeThread.start()
 					time.sleep(0.2)
 					upgradeThread.join()
-					strings  = queues.get()
+					string = queues.get()
+					strings = json.dumps(string)
 					queues.task_done()
 					print(strings)
 					print("thread sollte laufen")
-					newSocket.send(bytes(strings,'utf-8'))
+					time.sleep(0.2)
+					if len(bytes(strings,'utf-8')) > 5000:
+						newStrings = {"Filename" : string["Filename"],
+								"Upgrade":"start",
+	        						"data" : string["data"][0:700],
+								"end": False}
+						data = string["data"][500:len(string["data"])]
+						filename = string["Filename"]
+						strings = json.dumps(newStrings)
+						newSocket.send(bytes(strings,'utf-8'))
+					else:
+						newSocket.send(bytes(strings,'utf-8'))
+				
 			else:
 				connected = False
 				print("disconnected")

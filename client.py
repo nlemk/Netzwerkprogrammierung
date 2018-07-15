@@ -208,6 +208,7 @@ print(message)
 count = 0
 t = Thread(target = listener, args=(s,))
 t.start()
+gettingUpgrade = False
 while True:
 	time.sleep(0.5)
 	count += 1
@@ -235,19 +236,39 @@ while True:
 				
 	elif len(upgrade) > 0:
 		#todo upgrade
+		data = ""
 		for x in range(0, len(upgrade)):
 			print(x)
 			upgradePackage = {"Upgrade" : upgrade[x]}
-			upgradePackage.update({"Client-ID": clientID})
+			'''upgradePackage.update({"Client-ID": clientID})
 			upgradePackage =  json.dumps(upgradePackage)
 			print(upgradePackage)
 			s.send(bytes(upgradePackage,'utf-8'))
-			time.sleep(0.5)
+			time.sleep(0.5)'''
 
-			upgradeText = s.recv(1000)
-			upgradeText = upgradeText.decode('utf-8')
-			upgradeText = json.loads(upgradeText)
-			print(upgradeText)
+			gettingUpgrade = True
+			while gettingUpgrade:	
+				print("get upgrade")	
+				upgradePackage.update({"Client-ID": clientID})
+				upgradePackage = json.dumps(upgradePackage)
+				print(upgradePackage)
+				s.send(bytes(upgradePackage,'utf-8'))
+				time.sleep(0.5)
+				
+				upgradeText = s.recv(5000)
+				upgradeText = upgradeText.decode('utf-8')
+				#upgradeText = json.loads(upgradeText)
+				upgradeText = json.loads(upgradeText, strict=False)
+				print(upgradeText["data"])
+				if upgradeText["Upgrade"] == "start":
+					data += upgradeText["data"]
+					print(upgradeText["end"])
+					if upgradeText["end"]:
+						f = open(upgradeText["Filename"], "wb")
+						f.write(bytes(data,'latin-1'))
+						f.close()
+						gettingUpgrade = False
+					upgradePackage = {}
 			#neue datein upgraden und version ändern	
 		upgrade = []
 	else:
