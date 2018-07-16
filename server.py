@@ -8,21 +8,25 @@ from threading import Thread
 from package import Package
 from distutils.version import LooseVersion
 import subprocess
-import queue
+#import queue
 
+"""Der Host fuer den Server"""
 host = 'localhost'
+"""Der Port des Servers. Wird fuer die Anmeldung benutzt"""
 port = 9000
+"""Der Port fuer die weiteren Anwendungen"""
 newPort = port+1
-count = 0
+"""Die Liste der Clients, die sich bereits mit dem Server verbunden haben"""
 clientList = []
+"""Liste der Clients, die aktuell mit dem Server verbunden sind"""
 connectedClients = []
 
-'''package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
-package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
-package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
-package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
+#package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
+#package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
+#package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
+#package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
 
-packageList = [package1, package2, package3, package4]'''
+#packageList = [package1, package2, package3, package4]'''
 
 packageList=[]
 try:
