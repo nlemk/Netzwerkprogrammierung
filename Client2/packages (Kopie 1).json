@@ -1,6 +1,6 @@
 {"packages":[
 {"name" : "test1", "version" : "1.0.3", "url":"http://localhost:9000/resources/myclient_1.0.zip"},
-{"name" : "useless_Package", "version" : "1.0.0", "url":"http://localhost:9000/resources/asd.zip"},
+{"name" : "useless_Package", "version" : "1.0.0", "url":"http://localhost:9000/resources/nothing.zip"},
 {"name" : "package1", "version" : "2.4.99", "url":"http://localhost:9000/resources/importantStuff.zip"},
 {"name" : "lastPackage", "version" : "3.2.1", "url":"http://localhost:9000/resources/fancy.zip"}]
 }

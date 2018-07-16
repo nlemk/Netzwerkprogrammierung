@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module server</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>server</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/nils/Netzwerkprogrammierung/server.py">/home/nils/Netzwerkprogrammierung/server.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="json.html">json</a><br>
+<a href="queue.html">queue</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="select.html">select</a><br>
+</td><td width="25%" valign=top><a href="socket.html">socket</a><br>
+<a href="subprocess.html">subprocess</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-anmelden"><strong>anmelden</strong></a>(s)</dt><dd><tt>Der&nbsp;Server&nbsp;und&nbsp;der&nbsp;Client&nbsp;gehen&nbsp;eine&nbsp;Verbindung&nbsp;ein.&nbsp;Er&nbsp;schickt&nbsp;dem&nbsp;Client&nbsp;einen&nbsp;neuen&nbsp;Port,&nbsp;um&nbsp;den&nbsp;aktuellen&nbsp;Port&nbsp;fuer&nbsp;weitere&nbsp;<br>
+Anmeldungen&nbsp;zugaenglich&nbsp;zu&nbsp;lassen.&nbsp;Durch&nbsp;die&nbsp;erste&nbsp;Anmeldung&nbsp;an&nbsp;den&nbsp;Server&nbsp;registriert&nbsp;sich&nbsp;der&nbsp;Client<br>
+&nbsp;<br>
+s:&nbsp;Der&nbsp;Socket&nbsp;zum&nbsp;senden&nbsp;und&nbsp;empfangen</tt></dd></dl>
+ <dl><dt><a name="-checkForUpdate"><strong>checkForUpdate</strong></a>(clientPackages)</dt><dd><tt>Checkt&nbsp;die&nbsp;Versionen&nbsp;der&nbsp;Packages&nbsp;von&nbsp;Server&nbsp;und&nbsp;Client.&nbsp;Ist&nbsp;die&nbsp;Client-Version&nbsp;nicht&nbsp;die&nbsp;neueste,&nbsp;wird&nbsp;sie&nbsp;in&nbsp;die&nbsp;Liste&nbsp;der&nbsp;Updates&nbsp;<br>
+eingefuegt<br>
+ClientPackages:&nbsp;Die&nbsp;Packete&nbsp;des&nbsp;Clients<br>
+&nbsp;<br>
+Gibt&nbsp;die&nbsp;Liste&nbsp;mit&nbsp;Packages&nbsp;zuruck,&nbsp;die&nbsp;ein&nbsp;Update&nbsp;verfuegbar&nbsp;haben</tt></dd></dl>
+ <dl><dt><a name="-fillPackageList"><strong>fillPackageList</strong></a>()</dt><dd><tt>Liest&nbsp;die&nbsp;Datei&nbsp;packages.json&nbsp;ein,&nbsp;erstellt&nbsp;daraus&nbsp;ein&nbsp;dict,&nbsp;erstellt&nbsp;mit&nbsp;diesen&nbsp;Werten&nbsp;ein&nbsp;Package&nbsp;und&nbsp;fuegt&nbsp;die&nbsp;in&nbsp;die&nbsp;Liste&nbsp;ein.</tt></dd></dl>
+ <dl><dt><a name="-heartbeat"><strong>heartbeat</strong></a>(newSocket, clientID)</dt><dd><tt>Einlesen&nbsp;aller&nbsp;gesendeten&nbsp;Daten,&nbsp;nach&nbsp;dem&nbsp;anmelden.Hier&nbsp;wird&nbsp;der&nbsp;heartbeat,&nbsp;das&nbsp;Update&nbsp;und&nbsp;das&nbsp;Upgrade&nbsp;behandelt.<br>
+Endet&nbsp;der&nbsp;Heartbeat,&nbsp;aendert&nbsp;sich&nbsp;der&nbsp;Alive-Status&nbsp;und&nbsp;beendet&nbsp;den&nbsp;heartbeat-Thread<br>
+newSocket:&nbsp;Der&nbsp;Socket&nbsp;wird&nbsp;zum&nbsp;Senden&nbsp;und&nbsp;Empfangen&nbsp;von&nbsp;Daten&nbsp;uebergeben<br>
+clientID&nbsp;:&nbsp;ID&nbsp;des&nbsp;Clients.&nbsp;Falls&nbsp;seine&nbsp;ID&nbsp;nicht&nbsp;im&nbsp;heartbeat&nbsp;uebergeben&nbsp;werden&nbsp;kann.&nbsp;Dient&nbsp;in&nbsp;diesem&nbsp;Fall&nbsp;zur&nbsp;entfernung&nbsp;des&nbsp;Client&nbsp;aus&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;der&nbsp;Liste&nbsp;der&nbsp;aktiven&nbsp;Clients</tt></dd></dl>
+ <dl><dt><a name="-listen"><strong>listen</strong></a>()</dt><dd><tt>Behandelt&nbsp;die&nbsp;Eingabe&nbsp;des&nbsp;Servers.<br>
+show&nbsp;id&nbsp;&nbsp;:&nbsp;benoetigt&nbsp;die&nbsp;ID&nbsp;eines&nbsp;Clients.&nbsp;Zeigt&nbsp;dessen&nbsp;Informationen&nbsp;an(GPU,CPU,RAM,IP,&nbsp;etc.)<br>
+list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;listet&nbsp;alle&nbsp;Clients&nbsp;auf,&nbsp;die&nbsp;sich&nbsp;verbunden&nbsp;haben.&nbsp;Zeigt&nbsp;auch&nbsp;nicht&nbsp;verbundene&nbsp;Clients<br>
+alive&nbsp;id&nbsp;:&nbsp;benoetigt&nbsp;die&nbsp;ID&nbsp;eines&nbsp;Clients.&nbsp;Zeigt&nbsp;an,&nbsp;ob&nbsp;der&nbsp;Client&nbsp;noch&nbsp;verbunden&nbsp;ist</tt></dd></dl>
+ <dl><dt><a name="-newConnection"><strong>newConnection</strong></a>(newport, clientID)</dt><dd><tt>Verbindung&nbsp;des&nbsp;Clients&nbsp;mit&nbsp;dem&nbsp;neuen&nbsp;Port.&nbsp;Der&nbsp;Server&nbsp;fragt&nbsp;hier&nbsp;nach&nbsp;detaillierteren&nbsp;Infos&nbsp;des&nbsp;Clients&nbsp;und&nbsp;sendet&nbsp;dem&nbsp;Client&nbsp;eine&nbsp;<br>
+Bestaetigung&nbsp;fuer&nbsp;die&nbsp;Verbindung.&nbsp;Startet&nbsp;den&nbsp;Thread&nbsp;fuer&nbsp;den&nbsp;Heartbeat<br>
+newport&nbsp;&nbsp;:&nbsp;Uebergabe&nbsp;des&nbsp;neuen&nbsp;Ports<br>
+clientID&nbsp;:&nbsp;Zum&nbsp;Registrieren<br>
+&nbsp;<br>
+clientList:&nbsp;Liste&nbsp;aller&nbsp;Clients.&nbsp;Zum&nbsp;Registrieren</tt></dd></dl>
+ <dl><dt><a name="-setAlive"><strong>setAlive</strong></a>(clientID)</dt><dd><tt>Setzt&nbsp;den&nbsp;Status&nbsp;Alive&nbsp;eines&nbsp;Clients&nbsp;auf&nbsp;False<br>
+clientID:&nbsp;ID&nbsp;des&nbsp;Clients&nbsp;um&nbsp;ihn&nbsp;zu&nbsp;finden</tt></dd></dl>
+ <dl><dt><a name="-upgrade"><strong>upgrade</strong></a>(package, queues)</dt><dd><tt>Sucht&nbsp;das&nbsp;Package,&nbsp;welches&nbsp;ein&nbsp;Upgrade&nbsp;benoetigt.&nbsp;Die&nbsp;Daten&nbsp;werden&nbsp;in&nbsp;ein&nbsp;dict&nbsp;eingegeben.&nbsp;Das&nbsp;dict&nbsp;wird&nbsp;in&nbsp;der&nbsp;queue&nbsp;gespeichert,&nbsp;um&nbsp;<br>
+es&nbsp;nach&nbsp;Ablauf&nbsp;des&nbsp;fuer&nbsp;diese&nbsp;Funktion&nbsp;erstellten&nbsp;Threads&nbsp;uebergeben&nbsp;zu&nbsp;koennen</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>clientList</strong> = [{'Client-ID': '52233001445--Number1', 'Info': {'CPU:Info': {'Architecture': 'x86_64', 'CPU(s)': '3', 'Model name': 'Intel(R) Core(TM) i7-4510U CPU @ 2.00GHz'}, 'GPU-Info': {' Beschreibung': ' VGA compatible controller', ' Hersteller': ' VMware', ' Produkt': ' SVGA II Adapter', ' Takt': ' 33MHz'}, 'RAM-Info': {'MemAvailable': '5396640kB', 'MemFree': '4987056kB', 'MemTotal': '6252224kB'}}}]<br>
+<strong>connectedClients</strong> = ['52233001445--Number1']<br>
+<strong>host</strong> = 'localhost'<br>
+<strong>listener</strong> = &lt;Thread(Thread-1, initial)&gt;<br>
+<strong>newPort</strong> = 9002<br>
+<strong>packageList</strong> = [&lt;package.Package object&gt;, &lt;package.Package object&gt;, &lt;package.Package object&gt;, &lt;package.Package object&gt;]<br>
+<strong>port</strong> = 9000<br>
+<strong>s</strong> = &lt;socket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6&gt;</td></tr></table>
+</body></html>

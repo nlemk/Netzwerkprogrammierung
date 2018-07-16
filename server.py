@@ -11,50 +11,39 @@ import select
 import subprocess
 import queue
 
-"""Der Host fuer den Server"""
 host = 'localhost'
-"""Der Port des Servers. Wird fuer die Anmeldung benutzt"""
 port = 9000
-"""Der Port fuer die weiteren Anwendungen"""
 newPort = port+1
-"""Die Liste der Clients, die sich bereits mit dem Server verbunden haben"""
 clientList = []
-"""Liste der Clients, die aktuell mit dem Server verbunden sind"""
 connectedClients = []
-
-#package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
-#package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
-#package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
-#package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
-
-#packageList = [package1, package2, package3, package4]'''
-
 packageList=[]
-try:
-	f = open("packages.json","r")
-	packageFile = f.read()
-	f.close()
-except FileNotFound:
-	pass
-if len(packageFile) > 0:
-	packages = json.loads(packageFile)
-	for x in packages["packages"]:
-		print(x)
-		newPackage = Package(x["name"],x["version"],x["url"])
-		packageList.append(newPackage)
+
+def fillPackageList():
+	"""Liest die Datei packages.json ein, erstellt daraus ein dict, erstellt mit diesen Werten ein Package und fuegt die in die Liste ein."""
+	global PackageList	
+	try:
+		f = open("packages.json","r")
+		packageFile = f.read()
+		f.close()
+	except FileNotFound:
+		pass
+	if len(packageFile) > 0:
+		packages = json.loads(packageFile)
+		for x in packages["packages"]:
+			newPackage = Package(x["name"],x["version"],x["url"])
+			packageList.append(newPackage)
 
 
 def upgrade(package, queues):
-	#print(package)
+	"""Sucht das Package, welches ein Upgrade benoetigt. Die Daten werden in ein dict eingegeben. Das dict wird in der queue gespeichert, um 
+	es nach Ablauf des fuer diese Funktion erstellten Threads uebergeben zu koennen"""
 	upgradePackage = None
 	for x in packageList:
 		if x.name == package:
 			upgradePackage = x
 	zipName = upgradePackage.url.replace("http://localhost:9000/","")
-	#zipName = zipName[len(zipName)-1]
 	f = open(zipName, "rb")
 	zipData = f.read()
-	#print(zipData)
 	f.close()
 	try:
 		zipData = zipData.decode('latin-1')
@@ -67,14 +56,17 @@ def upgrade(package, queues):
 	queues.put(data)
 
 
-
-
 def checkForUpdate(clientPackages):
+	"""Checkt die Versionen der Packages von Server und Client. Ist die Client-Version nicht die neueste, wird sie in die Liste der Updates 
+	eingefuegt
+	ClientPackages: Die Packete des Clients
+
+	Gibt die Liste mit Packages zuruck, die ein Update verfuegbar haben"""
 	#falls keine Packages installiert sind
 	updateList = []
 	if not bool(clientPackages):
 		updateList.append("Everything up to date")
-		return updateMessage
+		return updateList
 	else:
 		for x in range(0,len(clientPackages)):
 			for y in range(0, len(packageList)):
@@ -85,25 +77,26 @@ def checkForUpdate(clientPackages):
 		return updateList
 
 def setAlive(clientID):
+	"""Setzt den Status Alive eines Clients auf False
+	clientID: ID des Clients um ihn zu finden"""
 	global clientList
 	for x in clientList:
 		if x["Client-ID"] == clientID:
 			x["Alive"] = "False"
 
 def heartbeat(newSocket, clientID):
+	"""Einlesen aller gesendeten Daten, nach dem anmelden.Hier wird der heartbeat, das Update und das Upgrade behandelt.
+	Endet der Heartbeat, aendert sich der Alive-Status und beendet den heartbeat-Thread
+	newSocket: Der Socket wird zum Senden und Empfangen von Daten uebergeben
+	clientID : ID des Clients. Falls seine ID nicht im heartbeat uebergeben werden kann. Dient in diesem Fall zur entfernung des Client aus 
+		   der Liste der aktiven Clients"""
 	connected = True
 	global count,connectedClients
 	json_iD = None
 	data = ""
 	filename = ""
 	while connected:
-		#print("thread" + str(count))
-		#count+=1
 		try:
-			#heartbeat setzt aus funktion wartet auf eingabe -> beendet nicht
-			# timer oder timeout einbauen, eartet max 5sek auf eingabe, keine da -> disconnect
-			# listen auslagern in neuen Thread
-			# compare der packages -> liste abschicken
 			newSocket.settimeout(3)
 			try:
 				message = newSocket.recv(1000)
@@ -112,8 +105,8 @@ def heartbeat(newSocket, clientID):
 					message = json.loads(message)
 					if "Client-ID" in message:
 						connected = True
-						#print(message["Client-ID"])
 					if "Packages" in message:
+						print("Check Updates für Client " + str(message["Client-ID"]))
 						if not bool(message["Packages"]):
 							upd = {"Updates" : "Keine Updates vorhanden"}
 						else:
@@ -147,16 +140,13 @@ def heartbeat(newSocket, clientID):
 						strings = json.dumps(newStrings)
 						newSocket.send(bytes(strings,'utf-8'))
 					if "message" in message:
-						print(message)
 						for x in packageList:
 							if x.name == message["Name"]:
 								newVersion = {"Version" : x.version}
-								print(x.version)
 								time.sleep(0.5)
 								newSocket.send(bytes(json.dumps(newVersion),'utf-8'))
 								break
 					if "Upgrade" in message:
-						print("upgrade")
 						queues = queue.Queue()
 						upgradeThread = Thread(target = upgrade, args=(message["Upgrade"]["Package"],queues,))
 						upgradeThread.start()
@@ -165,9 +155,8 @@ def heartbeat(newSocket, clientID):
 						string = queues.get()
 						strings = json.dumps(string)
 						queues.task_done()
-						print(strings)
-						print("thread sollte laufen")
 						time.sleep(0.2)
+						print("Sende Upgrade an Client"  + str(message["Client-ID"]))
 						if len(bytes(strings,'utf-8')) > 5000:
 							newStrings = {"Filename" : string["Filename"],
 									"Upgrade":"start",
@@ -184,9 +173,9 @@ def heartbeat(newSocket, clientID):
 					connected = False
 					connectedClients.remove(clientID)
 					setAlive(clientID)
-					print("disconnected")
+					print(str(clientID) + " disconnected")
 			except socket.timeout:
-				print("disconnected --timeout")
+				print(str(clientID) + " disconnected --timeout")
 				connected = False
 				connectedClients.remove(clientID)
 				setAlive(clientID)
@@ -194,13 +183,16 @@ def heartbeat(newSocket, clientID):
 			connected = False
 			connectedClients.remove(clientID)
 			setAlive(clientID)
-			print("Connection lost")
+			print(str(clientID) + " Connection lost")
 		except json.decoder.JSONDecodeError:
 			connected = True
-	print("end")
 
 
 def anmelden(s):
+	"""Der Server und der Client gehen eine Verbindung ein. Er schickt dem Client einen neuen Port, um den aktuellen Port fuer weitere 
+	Anmeldungen zugaenglich zu lassen. Durch die erste Anmeldung an den Server registriert sich der Client
+	
+	s: Der Socket zum senden und empfangen"""
 	#verbinden und anmelden
 	connect = False
 	global clientList, newPort, connectedClients
@@ -210,7 +202,6 @@ def anmelden(s):
 			print("Connection with Client {}".format(addr))
 	
 			inSocket.send(bytes("Server accepts connection",'utf-8'))
-			#inSocket.close()
 			connect = True
 		time.sleep(0.5)
 		clientInfo = inSocket.recv(500)		
@@ -232,10 +223,9 @@ def anmelden(s):
 			clientList.append(json_info)
 		if json_info["Client-ID"] not in connectedClients:
 			connectedClients.append(json_info["Client-ID"])
-			print(connectedClients)
 			connectThread.start()
 		else:
-			print("connection refused")
+			print("connection refused for Client" + str(json_info["Client-ID"]))
 		inSocket.close()
 		
 		s.listen(socket.SOMAXCONN)
@@ -244,6 +234,12 @@ def anmelden(s):
 		s.close()
 
 def newConnection(newport, clientID):
+	"""Verbindung des Clients mit dem neuen Port. Der Server fragt hier nach detaillierteren Infos des Clients und sendet dem Client eine 
+	Bestaetigung fuer die Verbindung. Startet den Thread fuer den Heartbeat
+	newport  : Uebergabe des neuen Ports
+	clientID : Zum Registrieren
+	
+	clientList: Liste aller Clients. Zum Registrieren"""
 	global clientList
 	newsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
 	newsock.bind((host,newport))
@@ -259,7 +255,7 @@ def newConnection(newport, clientID):
 		text = json.dumps(text)
 		newSocket.send(bytes(text,'utf-8'))
 		time.sleep(0.5)
-		completeClientInfo = newSocket.recv(500)
+		completeClientInfo = newSocket.recv(1000)
 		completeClientInfo = completeClientInfo.decode('utf-8')
 		completeClientInfo = json.loads(completeClientInfo)
 		for changer in range(0, len(clientList)):
@@ -268,8 +264,7 @@ def newConnection(newport, clientID):
 				break
 		t = Thread(target=heartbeat, args=(newSocket,clientID,))	
 		t.start()
-		while t.is_alive():	
-			#print(len(clientList))		
+		while t.is_alive():			
 			time.sleep(0.5)
 
 	finally:
@@ -278,6 +273,10 @@ def newConnection(newport, clientID):
 
 
 def listen():
+	"""Behandelt die Eingabe des Servers.
+	show id  : benoetigt die ID eines Clients. Zeigt dessen Informationen an(GPU,CPU,RAM,IP, etc.)
+	list     : listet alle Clients auf, die sich verbunden haben. Zeigt auch nicht verbundene Clients
+	alive id : benoetigt die ID eines Clients. Zeigt an, ob der Client noch verbunden ist"""
 	while True:
 		action = input()
 		action = action.split(" ")
@@ -354,6 +353,8 @@ def listen():
 				print("Gib eine ID hinter den Befehl alive ein.")
 	
 
+
+fillPackageList()
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
 s.bind((host,port))
 s.listen(socket.SOMAXCONN)
@@ -361,4 +362,3 @@ s.listen(socket.SOMAXCONN)
 listener = Thread(target=listen)
 listener.start()
 anmelden(s)
-

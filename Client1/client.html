@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module client</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>client</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/nils/Netzwerkprogrammierung/Client1/client.py">/home/nils/Netzwerkprogrammierung/Client1/client.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="json.html">json</a><br>
+<a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="platform.html">platform</a><br>
+<a href="random.html">random</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+<a href="socket.html">socket</a><br>
+</td><td width="25%" valign=top><a href="subprocess.html">subprocess</a><br>
+<a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-changeVersion"><strong>changeVersion</strong></a>(newVersion, packageName)</dt><dd><tt>Aendert&nbsp;die&nbsp;Version&nbsp;des&nbsp;geupgradeten&nbsp;Packages&nbsp;und&nbsp;schreibt&nbsp;die&nbsp;neuen&nbsp;Daten&nbsp;in&nbsp;die&nbsp;Datei&nbsp;packages.json.<br>
+&nbsp;<br>
+newVersion:&nbsp;neue&nbsp;Version&nbsp;des&nbsp;Packages<br>
+packageName:&nbsp;Name&nbsp;des&nbsp;Packages</tt></dd></dl>
+ <dl><dt><a name="-communication"><strong>communication</strong></a>(s)</dt><dd><tt>Wartet&nbsp;auf&nbsp;Nachrichten&nbsp;des&nbsp;Servers,&nbsp;bis&nbsp;er&nbsp;sagt,&nbsp;der&nbsp;Port&nbsp;wurde&nbsp;gewechselt&nbsp;und&nbsp;ihn&nbsp;anfordert&nbsp;neue&nbsp;Informationen&nbsp;zu&nbsp;schicken.Der&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Client&nbsp;sendet&nbsp;darauf&nbsp;alle&nbsp;seine&nbsp;Informationen.<br>
+&nbsp;<br>
+s&nbsp;:&nbsp;der&nbsp;Socket&nbsp;wird&nbsp;zum&nbsp;Senden&nbsp;und&nbsp;Empfangen&nbsp;von&nbsp;Daten&nbsp;uebergeben</tt></dd></dl>
+ <dl><dt><a name="-connectToNewPort"><strong>connectToNewPort</strong></a>(s)</dt><dd><tt>Sendet&nbsp;die&nbsp;Infos&nbsp;ueber&nbsp;die&nbsp;Hardware&nbsp;an&nbsp;den&nbsp;Server&nbsp;und&nbsp;wartet,&nbsp;bis&nbsp;der&nbsp;Server&nbsp;ihm&nbsp;einen&nbsp;neuen&nbsp;Port&nbsp;zuteilt.&nbsp;Schließt&nbsp;den&nbsp;Socket.<br>
+s:&nbsp;der&nbsp;Socket.&nbsp;der&nbsp;Socket&nbsp;wird&nbsp;fuer&nbsp;das&nbsp;Senden&nbsp;und&nbsp;Empfangen&nbsp;von&nbsp;Daten&nbsp;uebergeben.</tt></dd></dl>
+ <dl><dt><a name="-fillPackageList"><strong>fillPackageList</strong></a>()</dt><dd><tt>Sucht&nbsp;in&nbsp;der&nbsp;Datei&nbsp;packages.json&nbsp;nach&nbsp;den&nbsp;Packagedaten,&nbsp;ueberfuehrt&nbsp;sie&nbsp;in&nbsp;Package-Objekte&nbsp;und&nbsp;fuegt&nbsp;sie&nbsp;der&nbsp;Liste&nbsp;hinzu</tt></dd></dl>
+ <dl><dt><a name="-getCPUInfo"><strong>getCPUInfo</strong></a>()</dt><dd><tt>Benutzt&nbsp;Unix-Befehle&nbsp;um&nbsp;Informationen&nbsp;ueber&nbsp;die&nbsp;CPU&nbsp;zu&nbsp;bekommen.Die&nbsp;Ausgabe&nbsp;des&nbsp;Befehls&nbsp;wird&nbsp;in&nbsp;einer&nbsp;Varibale&nbsp;gespeichert.<br>
+Mittels&nbsp;Regular&nbsp;Expressions&nbsp;werden&nbsp;die&nbsp;gesuchten&nbsp;Daten&nbsp;herausgefiltert.</tt></dd></dl>
+ <dl><dt><a name="-getClientID"><strong>getClientID</strong></a>()</dt><dd><tt>Gibt&nbsp;die&nbsp;MacAdresse&nbsp;zurück.<br>
+Gegebenenfalls&nbsp;mit&nbsp;Zusatz&nbsp;zum&nbsp;Testen&nbsp;von&nbsp;2&nbsp;Adressen</tt></dd></dl>
+ <dl><dt><a name="-getGPUInfo"><strong>getGPUInfo</strong></a>()</dt><dd><tt>Benutzt&nbsp;Unix-Befehle&nbsp;um&nbsp;Informationen&nbsp;ueber&nbsp;die&nbsp;CPU&nbsp;zu&nbsp;bekommen.Die&nbsp;Ausgabe&nbsp;des&nbsp;Befehls&nbsp;wird&nbsp;in&nbsp;einer&nbsp;Varibale&nbsp;gespeichert.<br>
+Mittels&nbsp;Regular&nbsp;Expressions&nbsp;werden&nbsp;die&nbsp;gesuchten&nbsp;Daten&nbsp;herausgefiltert.</tt></dd></dl>
+ <dl><dt><a name="-getHardwareInfo"><strong>getHardwareInfo</strong></a>()</dt><dd><tt>Erzeugt&nbsp;ein&nbsp;dict&nbsp;mit&nbsp;der&nbsp;Client-ID&nbsp;und&nbsp;der&nbsp;Information&nbsp;ueber&nbsp;CPU,&nbsp;RAM,&nbsp;GPU&nbsp;und&nbsp;gibt&nbsp;dieses&nbsp;zurueck.</tt></dd></dl>
+ <dl><dt><a name="-getRAMInfo"><strong>getRAMInfo</strong></a>()</dt><dd><tt>Benutzt&nbsp;Unix-Befehle&nbsp;um&nbsp;Informationen&nbsp;ueber&nbsp;den&nbsp;RAM&nbsp;zu&nbsp;bekommen.Die&nbsp;Ausgabe&nbsp;des&nbsp;Befehls&nbsp;wird&nbsp;in&nbsp;einer&nbsp;Varibale&nbsp;gespeichert.<br>
+Mittels&nbsp;Regular&nbsp;Expressions&nbsp;werden&nbsp;die&nbsp;gesuchten&nbsp;Daten&nbsp;herausgefiltert.</tt></dd></dl>
+ <dl><dt><a name="-getTime"><strong>getTime</strong></a>()</dt><dd><tt>Gibt&nbsp;das&nbsp;Datum&nbsp;und&nbsp;die&nbsp;Uhrzeit&nbsp;zurueck</tt></dd></dl>
+ <dl><dt><a name="-gmtime"><strong>gmtime</strong></a>(...)</dt><dd><tt><a href="#-gmtime">gmtime</a>([seconds])&nbsp;-&gt;&nbsp;(tm_year,&nbsp;tm_mon,&nbsp;tm_mday,&nbsp;tm_hour,&nbsp;tm_min,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tm_sec,&nbsp;tm_wday,&nbsp;tm_yday,&nbsp;tm_isdst)<br>
+&nbsp;<br>
+Convert&nbsp;seconds&nbsp;since&nbsp;the&nbsp;Epoch&nbsp;to&nbsp;a&nbsp;time&nbsp;tuple&nbsp;expressing&nbsp;UTC&nbsp;(a.k.a.<br>
+GMT).&nbsp;&nbsp;When&nbsp;'seconds'&nbsp;is&nbsp;not&nbsp;passed&nbsp;in,&nbsp;convert&nbsp;the&nbsp;current&nbsp;time&nbsp;instead.<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;platform&nbsp;supports&nbsp;the&nbsp;tm_gmtoff&nbsp;and&nbsp;tm_zone,&nbsp;they&nbsp;are&nbsp;available&nbsp;as<br>
+attributes&nbsp;only.</tt></dd></dl>
+ <dl><dt><a name="-listener"><strong>listener</strong></a>()</dt><dd><tt>Diese&nbsp;Funktion&nbsp;wird&nbsp;von&nbsp;einem&nbsp;Thread&nbsp;benutzt&nbsp;und&nbsp;behandelt&nbsp;die&nbsp;verschiedenen<br>
+Befehle&nbsp;des&nbsp;Clients.&nbsp;Der&nbsp;Client&nbsp;kann&nbsp;nach&nbsp;Updates&nbsp;suchen,&nbsp;die&nbsp;Packete&nbsp;upgraden&nbsp;und&nbsp;die&nbsp;Verbindung&nbsp;beenden.<br>
+&nbsp;<br>
+Update&nbsp;:&nbsp;Die&nbsp;Information&nbsp;aller&nbsp;Packete&nbsp;wird&nbsp;in&nbsp;eine&nbsp;Liste&nbsp;von&nbsp;dictionarys&nbsp;gepackt<br>
+Upgrade:&nbsp;-name&nbsp;:&nbsp;ueberprueft,&nbsp;ob&nbsp;der&nbsp;angegebene&nbsp;Name&nbsp;in&nbsp;der&nbsp;Liste&nbsp;der&nbsp;Updates&nbsp;vorhanden&nbsp;ist.&nbsp;Ist&nbsp;er&nbsp;es&nbsp;wird&nbsp;das&nbsp;packet&nbsp;in&nbsp;die&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Upgrade_List&nbsp;ueberfuehrt<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-all&nbsp;&nbsp;:&nbsp;Uebernimmt&nbsp;alle&nbsp;Packages&nbsp;aus&nbsp;der&nbsp;Update-List&nbsp;in&nbsp;die&nbsp;Upgrade-Liste<br>
+&nbsp;<br>
+pack&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Dictionary&nbsp;zum&nbsp;speichern&nbsp;der&nbsp;Packete,&nbsp;um&nbsp;sie&nbsp;im&nbsp;Heartbeat&nbsp;an&nbsp;den&nbsp;Server&nbsp;zu&nbsp;schicken.<br>
+updateList&nbsp;:&nbsp;Sobald&nbsp;ein&nbsp;Upgrade&nbsp;angefragt&nbsp;wird,&nbsp;wird&nbsp;das&nbsp;Package&nbsp;aus&nbsp;der&nbsp;updateListe&nbsp;entfernt&nbsp;und&nbsp;in&nbsp;die&nbsp;Upgrade-Liste&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verschoben<br>
+connected&nbsp;&nbsp;:&nbsp;Variable,&nbsp;die&nbsp;entscheidet,&nbsp;ob&nbsp;auf&nbsp;Eingaben&nbsp;des&nbsp;seers&nbsp;gewartet&nbsp;werden&nbsp;soll.<br>
+hertbeat&nbsp;&nbsp;&nbsp;:&nbsp;Variable&nbsp;bei&nbsp;der&nbsp;Abfrage&nbsp;zur&nbsp;Serverbeendung.&nbsp;Verbindung&nbsp;darf&nbsp;nur&nbsp;beendet&nbsp;werden,&nbsp;wenn&nbsp;der&nbsp;heartbeat&nbsp;besteht.</tt></dd></dl>
+ <dl><dt><a name="-newConnection"><strong>newConnection</strong></a>()</dt><dd><tt>Erstellt&nbsp;einen&nbsp;neuen&nbsp;Socket&nbsp;um&nbsp;sich&nbsp;mit&nbsp;dem&nbsp;neuen&nbsp;Port&nbsp;mit&nbsp;dem&nbsp;Server&nbsp;zu&nbsp;verbinden.<br>
+Gibt&nbsp;den&nbsp;neu&nbsp;erstellten&nbsp;Socket&nbsp;s&nbsp;zurueck</tt></dd></dl>
+ <dl><dt><a name="-startConnection"><strong>startConnection</strong></a>(s)</dt><dd><tt>Wartet&nbsp;auf&nbsp;den&nbsp;Server,&nbsp;bis&nbsp;er&nbsp;eine&nbsp;Nachricht&nbsp;schickt.</tt></dd></dl>
+ <dl><dt><a name="-strftime"><strong>strftime</strong></a>(...)</dt><dd><tt><a href="#-strftime">strftime</a>(format[,&nbsp;tuple])&nbsp;-&gt;&nbsp;string<br>
+&nbsp;<br>
+Convert&nbsp;a&nbsp;time&nbsp;tuple&nbsp;to&nbsp;a&nbsp;string&nbsp;according&nbsp;to&nbsp;a&nbsp;format&nbsp;specification.<br>
+See&nbsp;the&nbsp;library&nbsp;reference&nbsp;manual&nbsp;for&nbsp;formatting&nbsp;codes.&nbsp;When&nbsp;the&nbsp;time&nbsp;tuple<br>
+is&nbsp;not&nbsp;present,&nbsp;current&nbsp;time&nbsp;as&nbsp;returned&nbsp;by&nbsp;localtime()&nbsp;is&nbsp;used.<br>
+&nbsp;<br>
+Commonly&nbsp;used&nbsp;format&nbsp;codes:<br>
+&nbsp;<br>
+%Y&nbsp;&nbsp;Year&nbsp;with&nbsp;century&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number.<br>
+%m&nbsp;&nbsp;Month&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number&nbsp;[01,12].<br>
+%d&nbsp;&nbsp;Day&nbsp;of&nbsp;the&nbsp;month&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number&nbsp;[01,31].<br>
+%H&nbsp;&nbsp;Hour&nbsp;(24-hour&nbsp;clock)&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number&nbsp;[00,23].<br>
+%M&nbsp;&nbsp;Minute&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number&nbsp;[00,59].<br>
+%S&nbsp;&nbsp;Second&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number&nbsp;[00,61].<br>
+%z&nbsp;&nbsp;Time&nbsp;zone&nbsp;offset&nbsp;from&nbsp;UTC.<br>
+%a&nbsp;&nbsp;Locale's&nbsp;abbreviated&nbsp;weekday&nbsp;name.<br>
+%A&nbsp;&nbsp;Locale's&nbsp;full&nbsp;weekday&nbsp;name.<br>
+%b&nbsp;&nbsp;Locale's&nbsp;abbreviated&nbsp;month&nbsp;name.<br>
+%B&nbsp;&nbsp;Locale's&nbsp;full&nbsp;month&nbsp;name.<br>
+%c&nbsp;&nbsp;Locale's&nbsp;appropriate&nbsp;date&nbsp;and&nbsp;time&nbsp;representation.<br>
+%I&nbsp;&nbsp;Hour&nbsp;(12-hour&nbsp;clock)&nbsp;as&nbsp;a&nbsp;decimal&nbsp;number&nbsp;[01,12].<br>
+%p&nbsp;&nbsp;Locale's&nbsp;equivalent&nbsp;of&nbsp;either&nbsp;AM&nbsp;or&nbsp;PM.<br>
+&nbsp;<br>
+Other&nbsp;codes&nbsp;may&nbsp;be&nbsp;available&nbsp;on&nbsp;your&nbsp;platform.&nbsp;&nbsp;See&nbsp;documentation&nbsp;for<br>
+the&nbsp;C&nbsp;library&nbsp;strftime&nbsp;function.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>connected</strong> = False<br>
+<strong>heartbeat</strong> = False<br>
+<strong>host</strong> = 'localhost'<br>
+<strong>newPort</strong> = {'newPort': 9001}<br>
+<strong>pack</strong> = None<br>
+<strong>packageDict</strong> = {}<br>
+<strong>packageList</strong> = [&lt;package.Package object&gt;, &lt;package.Package object&gt;, &lt;package.Package object&gt;, &lt;package.Package object&gt;]<br>
+<strong>port</strong> = 9001<br>
+<strong>s</strong> = &lt;socket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6&gt;<br>
+<strong>updateList</strong> = []<br>
+<strong>upgrade</strong> = []</td></tr></table>
+</body></html>
