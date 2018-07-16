@@ -11,19 +11,37 @@ import select
 import subprocess
 import queue
 
+"""Der Host fuer den Server"""
 host = 'localhost'
+"""Der Port des Servers. Wird fuer die Anmeldung benutzt"""
 port = 9000
+"""Der Port fuer die weiteren Anwendungen"""
 newPort = port+1
-count = 0
+"""Die Liste der Clients, die sich bereits mit dem Server verbunden haben"""
 clientList = []
+"""Liste der Clients, die aktuell mit dem Server verbunden sind"""
 connectedClients = []
 
-package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
-package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
-package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
-package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
+#package1 = Package("test1", "1.0.5", "http://localhost:9000/resources/myclient_1.0.zip")
+#package2 = Package("useless Package", "1.0.0", "http://localhost:9000/resources/nothing.zip")
+#package3 = Package("package1", "2.12.3", "http://localhost:9000/resources/importantStuff.zip")
+#package4 = Package("lastPackage", "4.0.6", "http://localhost:9000/resources/fancy.zip")
 
-packageList = [package1, package2, package3, package4]
+#packageList = [package1, package2, package3, package4]'''
+
+packageList=[]
+try:
+	f = open("packages.json","r")
+	packageFile = f.read()
+	f.close()
+except FileNotFound:
+	pass
+if len(packageFile) > 0:
+	packages = json.loads(packageFile)
+	for x in packages["packages"]:
+		print(x)
+		newPackage = Package(x["name"],x["version"],x["url"])
+		packageList.append(newPackage)
 
 
 def upgrade(package, queues):
@@ -32,10 +50,9 @@ def upgrade(package, queues):
 	for x in packageList:
 		if x.name == package:
 			upgradePackage = x
-	zipName = upgradePackage.url.split("/")
-	zipName = zipName[len(zipName)-1]
-	#print("resources/" +zipName)
-	f = open("resources/" +zipName, "rb")
+	zipName = upgradePackage.url.replace("http://localhost:9000/","")
+	#zipName = zipName[len(zipName)-1]
+	f = open(zipName, "rb")
 	zipData = f.read()
 	#print(zipData)
 	f.close()
@@ -81,7 +98,7 @@ def heartbeat(newSocket, clientID):
 	filename = ""
 	while connected:
 		#print("thread" + str(count))
-		count+=1
+		#count+=1
 		try:
 			#heartbeat setzt aus funktion wartet auf eingabe -> beendet nicht
 			# timer oder timeout einbauen, eartet max 5sek auf eingabe, keine da -> disconnect
@@ -129,6 +146,15 @@ def heartbeat(newSocket, clientID):
 							filename = ""
 						strings = json.dumps(newStrings)
 						newSocket.send(bytes(strings,'utf-8'))
+					if "message" in message:
+						print(message)
+						for x in packageList:
+							if x.name == message["Name"]:
+								newVersion = {"Version" : x.version}
+								print(x.version)
+								time.sleep(0.5)
+								newSocket.send(bytes(json.dumps(newVersion),'utf-8'))
+								break
 					if "Upgrade" in message:
 						print("upgrade")
 						queues = queue.Queue()
@@ -186,11 +212,10 @@ def anmelden(s):
 			inSocket.send(bytes("Server accepts connection",'utf-8'))
 			#inSocket.close()
 			connect = True
-	
+		time.sleep(0.5)
 		clientInfo = inSocket.recv(500)		
 		if (len(clientInfo) > 0):
 			info = clientInfo.decode('utf-8')
-			print(info)
 			json_info = json.loads(info)
 		#neuen Socket zum Verbinden benutzen
 		#alten frei geben
@@ -241,7 +266,6 @@ def newConnection(newport, clientID):
 			if clientList[changer]["Client-ID"] == completeClientInfo["Client-ID"]:
 				clientList[changer] = completeClientInfo
 				break
-		
 		t = Thread(target=heartbeat, args=(newSocket,clientID,))	
 		t.start()
 		while t.is_alive():	
